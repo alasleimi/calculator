@@ -1,0 +1,438 @@
+<html lang="en">
+<head>
+<title> calculator </title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#4285F4">
+<link rel="icon" 
+type="image/png" 
+href="icon.png">
+<style>
+    body {
+        display: flex;
+        justify-content: center;
+        font-size: 2vmin;
+        align-items: center;
+        background: #fafafa;
+      }
+      input:invalid {
+        outline: red auto 5px;
+      }
+      main {
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+        height: 95vh;
+        width: 95vmin;
+        box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 1px 5px 0 rgba(0, 0, 0, 0.12), 0 3px 1px -2px rgba(0, 0, 0, 0.2);
+      }
+      #input {
+        height: 20%;
+        font-size: 5vmin;
+        padding: 5px;
+        border-top: none;
+      }
+      #output {
+        height: 10%;
+        display: flex;
+        align-items: center;
+        font-size: 3vmin;
+      }
+      form {
+        height: 100%;
+        width: 100%;
+        padding: 0;
+        margin: 0;
+        display: flex;
+        justify-content: space-around;
+      }
+      button::before {
+        content: "";
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        display: block;
+        width: 0;
+        padding-top: 0;
+        border-radius: 100%;
+        background-color: rgba(255, 255, 255, .3);
+        transform: translate(-50%, -50%);
+      }
+      button:hover {
+        background: #EEEEEE;
+      }
+      button:active {
+        background: rgb(223, 223, 223);
+      }
+      #display {
+        height: 5%;
+        display: flex;
+        justify-content: space-around;
+        padding: 5px;
+      }
+      #UI {
+        display: flex;
+        height: 65%;
+      }
+      button {
+        border: none;
+        outline: none;
+        position: relative;
+        background: white;
+      }
+      button:active:before {
+        width: 120%;
+        padding-top: 120%;
+        transition: width 0.2s ease-out, padding-top .2s ease-out;
+      }
+      #UI button {
+        font-size: 3vmin;
+      }
+      #op {
+        display: flex;
+        flex-direction: column;
+        width: 20%;
+      }
+      #numpad {
+        display: flex;
+        flex-wrap: wrap;
+        flex-grow: 1;
+      }
+      #op button {
+        color: white;
+        background: #4285F4;
+        height: 16.66%;
+      }
+      #op button:hover {
+        background: rgb(52, 125, 243);
+      }
+      #op button:active {
+        background: rgb(45, 109, 212);
+      }
+      #op button:last-of-type {
+        flex-grow: 4;
+        background: #3367D6
+      }
+      #op button:last-of-type:hover {
+        background: rgb(38, 88, 189)
+      }
+      #op button:last-of-type:active {
+        background: rgb(34, 80, 172)
+      }
+      #numpad button {
+        min-width: 33.33%;
+        flex-grow: 1;
+      }
+      input[type="radio"] {
+        display: none;
+      }
+      input[type="radio"]+label {
+        display: flex;
+        border-radius: 5%;
+        align-items: center;
+        justify-content: center;
+      }
+      input[type="radio"]:checked+label {
+        color: white;
+        background-color: #4285F4;
+        width: 33%;
+        transition: all 600ms ease;
+      }
+
+</style>
+</head>
+<body>
+<main>
+<input id="input" aria-label="Fermer" onchange="parse(this)">
+<div id="output">=</div>
+<nav id="display">
+    <form >
+        <input id="fraction" name="display"  value="fractional"type="radio" checked>
+        <label for="fraction" >fraction</label>
+        <input id="decimal" name="display"  value="decimal" type="radio" >
+        <label for="decimal"  >decimal</label>
+        <input id="scientific"name="display" value="scientific" type="radio" >
+        <label for="scientific" >scientific</label>
+        </form>
+</nav>
+<section id="UI"  >
+    <div id="numpad">
+        <button onclick="clearinput()">clear</button>
+        <button onclick="del()">del</button>
+        <button onclick="insert(this)">%</button>
+        <button onclick="insert(this)">(</button>
+        <button onclick="insert(this)">)</button>
+<button onclick="insert(this)">i</button>
+<button onclick="insert(this)">1</button>
+<button onclick="insert(this)">2</button>
+<button onclick="insert(this)">3</button>
+<button onclick="insert(this)">4</button>
+<button onclick="insert(this)">5</button>
+<button onclick="insert(this)">6</button>
+<button onclick="insert(this)">7</button>
+<button onclick="insert(this)">8</button>
+<button onclick="insert(this)">9</button>
+<button onclick="insert(this)">0</button>
+<button onclick="insert(this)">.</button>
+<button onclick="insert(this)">ANS</button>
+
+</div>
+<div id="op">
+        <button onclick="insert(this)">/</button>
+        <button onclick="insert(this)">*</button>
+        <button onclick="insert(this)">-</button>
+        <button onclick="insert(this)">+</button>
+        <button onclick="parse(Input,true)">=</button></div>
+
+
+</section>
+</main>
+<script>
+"use strict"
+const Input = document.getElementById("input");
+let MODE = "fractional";
+const fraction = function(nom = 0, denom = 1) {
+  this.nom = nom;
+  this.denom = denom;
+}
+fraction.prototype.simplify = function() {
+  const gcd = (a, b) => b ? gcd(b, a % b) : a;
+  const div = gcd(this.nom, this.denom);
+  this.nom /= div;
+  this.denom /= div;
+  this.nom *= Math.sign(this.denom);
+  this.denom *= Math.sign(this.denom);
+  return this;
+}
+let fracMath = {
+  mult: (a, b) => new fraction(a.nom * b.nom, b.denom * a.denom).simplify(),
+  inverse: a => {
+    if(a.nom === 0) error("div by 0");
+    return new fraction(a.denom, a.nom);
+  },
+  div: (a, b) =>  fracMath.mult(a, fracMath.inverse(b)),
+  add: (a, b) => new fraction(a.nom * b.denom + b.nom * a.denom, a.denom * b.denom).simplify(),
+  neg: a => new fraction(-a.nom, a.denom),
+  subtract: (a, b) => fracMath.add(a, fracMath.neg(b)),
+  floor: a => {
+    if(a.denom === 0)error("div by 0")
+    return new fraction(Math.floor(a.nom / a.denom), 1)
+  }
+}
+let complx = function(a = new fraction(), b = new fraction()) {
+  this.real = a;
+  this.im = b;
+}
+let complxMath = {
+  mult: (a, b) => new complx(fracMath.subtract(fracMath.mult(a.real, b.real), fracMath.mult(a.im, b.im)), fracMath.add(fracMath.mult(a.real, b.im), fracMath.mult(b.real, a.im))),
+  add: (a, b) => new complx(fracMath.add(a.real, b.real), fracMath.add(a.im, b.im)),
+  subtract: (a, b) => new complx(fracMath.subtract(a.real, b.real), fracMath.subtract(a.im, b.im)),
+  inverse: a => {
+    let abs = fracMath.add(fracMath.mult(a.real, a.real), fracMath.mult(a.im, a.im));
+    return new complx(fracMath.div(a.real, abs), fracMath.neg(fracMath.div(a.im, abs)));
+  },
+  div: (a, b) => complxMath.mult(a, complxMath.inverse(b)),
+  floor: a => new complx(fracMath.floor(a.real), fracMath.floor(a.im)),
+  mod: (a, b) => complxMath.subtract(a, complxMath.mult(b, complxMath.floor(complxMath.div(a, b)))),
+  print: (a, MODE) => {
+    let out = "";
+    const format = (nom, denom, imaginary = false) => {
+      let out = "";
+      if (MODE === "fractional") {
+        if (!imaginary || nom !== 1)out += nom;
+        if (imaginary) out += "i"
+        if (denom !== 1) out += "/" + denom;
+      } else {
+        let n = nom / denom;
+        if (MODE === "scientific") {
+          if (imaginary) out += "i";
+          out += n.toExponential();
+        } else {
+          out += n;
+          if (imaginary) out += "i";
+        }
+      }
+      return out;
+    }
+    if (a.real.nom !== 0 || a.im.nom == 0) out += format(a.real.nom, a.real.denom)
+    if (a.im.nom !== 0) {
+      if (Math.sign(a.im.nom) == -1) out += " - ";
+      else if (a.real.nom !== 0) out += " + ";
+      out += format(Math.abs(a.im.nom), a.im.denom, true);
+    }
+    return out;
+  }
+}
+// holds the result of the last saved calculation
+let ANS = new complx();
+async function calcul(a) {
+ 
+  let opStack = [];
+  let otStack = [];
+  let tmp = a;
+  let tokens = [""];
+  let n = 0;
+  let apply = op => {
+    if (otStack.length < 2) {
+      //special case for the unary minus
+      var b = new complx();
+      var a = otStack.pop();
+    } else {
+      var a = otStack.pop();
+      var b = otStack.pop();
+    }
+    switch (op) {
+      case "%":
+        return complxMath.mod(b, a);
+        break;
+      case "+":
+        return complxMath.add(b, a);
+        break;
+      case "-":
+        return complxMath.subtract(b, a);
+        break;
+      case "*":
+        return complxMath.mult(b, a);
+        break;
+      case "/":
+      case ":":
+        
+        return complxMath.div(b, a);
+        break;
+    }
+  }
+  for (let i = 0; i < a.length; ++i) {
+    switch (a[i]) {
+      case "A":
+        i += 2;
+        tokens.push("ANS");
+        n = tokens.length;
+        tokens[n] = "";
+        break;
+      case "+":
+      case "*":
+      case "/":
+      case "(":
+      case "-":
+      case ")":
+      case "%":
+      case ":":
+        tokens.push(a[i]);
+        n = tokens.length;
+        tokens[n] = "";
+        break;
+      default:
+        tokens[n] += a[i];
+    }
+  }
+  const precedence = {
+    "+": 0,
+    "-": 0,
+    "*": 1,
+    "/": 1,
+    "%": 1,
+    ":": 1,
+    "(": -1,
+    ")": -1
+  }
+  let tofrac = a => {
+    let n = 1;
+    while (!Number.isInteger(a)) {
+      a *= 10;
+      n *= 10;
+    }
+    return new fraction(a, n).simplify();
+  }
+  for (let token of tokens) {
+    if (token !== "") {
+      if (token === "ANS") {
+        otStack.push(ANS);
+      } else if (!isNaN(token)) { // real numbers
+        otStack.push(new complx(tofrac(parseFloat(token))));
+      } else if (token.includes("i")) { // imaginary numbers
+        token = token.replace("i", "");
+        if (token === "") token = "1";
+        otStack.push(new complx(new fraction(), tofrac(parseFloat(token))));
+      } else {
+        switch (token) {
+          case "(":
+            opStack.push(token);
+            break;
+          case ")":
+            while (opStack.length && opStack[opStack.length - 1] !== '(') {
+              otStack.push(apply(opStack.pop()));
+            }
+            opStack.pop();
+            break;
+          default:
+                        
+            while (opStack.length && precedence[opStack[opStack.length - 1]] >= precedence[token]) {
+              otStack.push(apply(opStack.pop()));
+            }
+            opStack.push(token);
+            break;
+        }
+      }
+    }
+  }
+  while (opStack.length) {
+    otStack.push(apply(opStack.pop()));
+  }
+  if (otStack.length !== 1) {
+    throw "error"
+  }
+  return otStack[0];
+}
+
+function parse(el, updateANS = false) {
+  calcul(el.value).then(e => {
+    el.setCustomValidity("");
+    document.getElementById("output").textContent = "= " + complxMath.print(e, MODE);
+    if (updateANS) {
+      Input.value = "ANS";
+      ANS = e;
+    }
+  }).catch(e => {
+    console.log(e);
+    el.setCustomValidity("invalid or unsupported expression");
+  })
+}
+const insert = a => {
+  Input.value += a.textContent;
+  parse(Input);
+}
+const clearinput = () => {
+  Input.value = "";
+  document.getElementById("output").textContent = "=";
+}
+const del = () => {
+  Input.value = Input.value.slice(0, -1);
+}
+const keyboardInput = e => {
+  if (e.key === "=") {
+    parse(Input, true);
+    e.returnValue = false;
+  }
+  Input.focus();
+}
+const switchMode = e => {
+  MODE = e.target.value;
+  parse(Input);
+}
+document.getElementsByTagName("form")[0].addEventListener("change", switchMode, false);
+document.addEventListener("keypress", keyboardInput, false);
+</script>
+ <script>
+    "use strict"
+if ('serviceWorker' in navigator) {
+    console.log("Will the service worker register?");
+    navigator.serviceWorker.register('service-worker.js')
+      .then(function(reg){
+        console.log("Yes, it did.");
+      }).catch(function(err) {
+        console.log("No it didn't. This happened: ", err)
+      });
+  }
+</script>
+</body>
+</html>
