@@ -7,7 +7,7 @@
   "description": "claculator with fractions and complex numbers",
   "icons": [
 {
-  "src": "BigIcon.png",
+  "src": "BigIcon.PNG",
   "type": "image/png",
   "sizes": "512x512 192x192"
   
